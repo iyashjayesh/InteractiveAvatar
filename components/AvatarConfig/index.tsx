@@ -1,14 +1,15 @@
-import React, { useMemo, useState } from "react";
 import {
   AvatarQuality,
   ElevenLabsModel,
-  STTProvider,
-  VoiceEmotion,
   StartAvatarRequest,
+  STTProvider,
   VoiceChatTransport,
+  VoiceEmotion,
 } from "@heygen/streaming-avatar";
+import React, { useMemo, useState } from "react";
 
 import { Input } from "../Input";
+import { PDFUpload } from "../PDFUpload";
 import { Select } from "../Select";
 
 import { Field } from "./Field";
@@ -31,6 +32,8 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
     onConfigChange({ ...config, [key]: value });
   };
   const [showMore, setShowMore] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [useExistingKB, setUseExistingKB] = useState<boolean>(false);
 
   const selectedAvatar = useMemo(() => {
     const avatar = AVATARS.find(
@@ -54,12 +57,43 @@ export const AvatarConfig: React.FC<AvatarConfigProps> = ({
 
   return (
     <div className="relative flex flex-col gap-4 w-[550px] py-8 max-h-full overflow-y-auto px-4">
-      <Field label="Custom Knowledge Base ID">
-        <Input
-          placeholder="Enter custom knowledge base ID"
-          value={config.knowledgeId}
-          onChange={(value) => onChange("knowledgeId", value)}
-        />
+      <Field label="Knowledge Base">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 mb-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={!useExistingKB}
+                onChange={() => setUseExistingKB(false)}
+                className="cursor-pointer"
+              />
+              <span className="text-sm text-zinc-300">Upload PDF</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={useExistingKB}
+                onChange={() => setUseExistingKB(true)}
+                className="cursor-pointer"
+              />
+              <span className="text-sm text-zinc-300">Use Existing ID</span>
+            </label>
+          </div>
+
+          {useExistingKB ? (
+            <Input
+              placeholder="Enter existing Knowledge Base ID"
+              value={config.knowledgeId}
+              onChange={(value) => onChange("knowledgeId", value)}
+            />
+          ) : (
+            <PDFUpload
+              onUploadComplete={(knowledgeId) => onChange("knowledgeId", knowledgeId)}
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
+            />
+          )}
+        </div>
       </Field>
       <Field label="Avatar ID">
         <Select

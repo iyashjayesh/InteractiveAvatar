@@ -16,7 +16,7 @@ import { AvatarVideo } from "./AvatarSession/AvatarVideo";
 import { useStreamingAvatarSession } from "./logic/useStreamingAvatarSession";
 import { AvatarControls } from "./AvatarSession/AvatarControls";
 import { useVoiceChat } from "./logic/useVoiceChat";
-import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
+import { StreamingAvatarProvider, StreamingAvatarSessionState, useStreamingAvatarContext } from "./logic";
 import { LoadingIcon } from "./Icons";
 import { MessageHistory } from "./AvatarSession/MessageHistory";
 
@@ -36,6 +36,8 @@ const DEFAULT_CONFIG: StartAvatarRequest = {
   sttSettings: {
     provider: STTProvider.DEEPGRAM,
   },
+  // Disable avatar's built-in conversation when using RAG
+  disableIdleTimeout: true,
 };
 
 function InteractiveAvatar() {
@@ -99,8 +101,16 @@ function InteractiveAvatar() {
         console.log(">>>>> Avatar end message:", event);
       });
 
-      await startAvatar(config);
+      // Pass the config as-is - knowledgeId will be used by HeyGen
+      const avatarConfig = { ...config };
+      
+      if (config.knowledgeId) {
+        console.log("🔧 Starting avatar with HeyGen Knowledge Base:", config.knowledgeId);
+      }
 
+      await startAvatar(avatarConfig);
+
+      // Start voice chat if requested
       if (isVoiceChat) {
         await startVoiceChat();
       }
@@ -124,8 +134,8 @@ function InteractiveAvatar() {
 
   return (
     <div className="w-full flex flex-col gap-4">
-      <div className="flex flex-col rounded-xl bg-zinc-900 overflow-hidden">
-        <div className="relative w-full aspect-video overflow-hidden flex flex-col items-center justify-center">
+      <div className="flex flex-col rounded-xl bg-transparent overflow-hidden">
+        <div className="relative w-full aspect-video overflow-hidden flex flex-col items-center justify-center bg-transparent">
           {sessionState !== StreamingAvatarSessionState.INACTIVE ? (
             <AvatarVideo ref={mediaStream} />
           ) : (
