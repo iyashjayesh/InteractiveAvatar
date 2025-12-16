@@ -1,30 +1,29 @@
 import {
   AvatarQuality,
+  ElevenLabsModel,
+  StartAvatarRequest,
   StreamingEvents,
+  STTProvider,
   VoiceChatTransport,
   VoiceEmotion,
-  StartAvatarRequest,
-  STTProvider,
-  ElevenLabsModel,
 } from "@heygen/streaming-avatar";
-import { useEffect, useRef, useState } from "react";
 import { useMemoizedFn, useUnmount } from "ahooks";
+import { useEffect, useRef, useState } from "react";
 
-import { Button } from "./Button";
 import { AvatarConfig } from "./AvatarConfig";
-import { AvatarVideo } from "./AvatarSession/AvatarVideo";
-import { useStreamingAvatarSession } from "./logic/useStreamingAvatarSession";
 import { AvatarControls } from "./AvatarSession/AvatarControls";
-import { useVoiceChat } from "./logic/useVoiceChat";
-import { StreamingAvatarProvider, StreamingAvatarSessionState, useStreamingAvatarContext } from "./logic";
-import { LoadingIcon } from "./Icons";
+import { AvatarVideo } from "./AvatarSession/AvatarVideo";
 import { MessageHistory } from "./AvatarSession/MessageHistory";
+import { Button } from "./Button";
+import { LoadingIcon } from "./Icons";
+import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
+import { useStreamingAvatarSession } from "./logic/useStreamingAvatarSession";
+import { useVoiceChat } from "./logic/useVoiceChat";
 
-import { AVATARS } from "@/app/lib/constants";
 
 const DEFAULT_CONFIG: StartAvatarRequest = {
-  quality: AvatarQuality.Low,
-  avatarName: AVATARS[0].avatar_id,
+  quality: AvatarQuality.High,
+  avatarName: "Ann_Therapist_public", // Ann Therapist
   knowledgeId: undefined,
   voice: {
     rate: 1.5,
@@ -36,7 +35,6 @@ const DEFAULT_CONFIG: StartAvatarRequest = {
   sttSettings: {
     provider: STTProvider.DEEPGRAM,
   },
-  // Disable avatar's built-in conversation when using RAG
   disableIdleTimeout: true,
 };
 
@@ -103,16 +101,16 @@ function InteractiveAvatar() {
 
       // Pass the config as-is - knowledgeId will be used by HeyGen
       const avatarConfig = { ...config };
-      
+
       if (config.knowledgeId) {
         console.log("🔧 Starting avatar with HeyGen Knowledge Base:", config.knowledgeId);
       }
 
       await startAvatar(avatarConfig);
 
-      // Start voice chat if requested
+      // Start voice chat if requested (with mic muted for push-to-talk)
       if (isVoiceChat) {
-        await startVoiceChat();
+        await startVoiceChat(true); // Start muted
       }
     } catch (error) {
       console.error("Error starting avatar session:", error);

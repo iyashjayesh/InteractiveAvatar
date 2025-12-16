@@ -1,9 +1,9 @@
 import { ToggleGroup, ToggleGroupItem } from "@radix-ui/react-toggle-group";
 import React from "react";
 
-import { useVoiceChat } from "../logic/useVoiceChat";
 import { Button } from "../Button";
 import { useInterrupt } from "../logic/useInterrupt";
+import { useVoiceChat } from "../logic/useVoiceChat";
 
 import { AudioInput } from "./AudioInput";
 import { TextInput } from "./TextInput";
@@ -26,7 +26,7 @@ export const AvatarControls: React.FC = () => {
         value={isVoiceChatActive || isVoiceChatLoading ? "voice" : "text"}
         onValueChange={(value) => {
           if (value === "voice" && !isVoiceChatActive && !isVoiceChatLoading) {
-            startVoiceChat();
+            startVoiceChat(true); // Start with mic muted for push-to-talk
           } else if (
             value === "text" &&
             isVoiceChatActive &&
